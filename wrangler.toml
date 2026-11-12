@@ -1,3 +1,3 @@
-name = "suivi-sport01"
+name = "sport-performance"
 compatibility_date = "2026-11-12"
-pages_build_output_dir = "./cloudflare-upload"
+pages_build_output_dir = "./dist"
