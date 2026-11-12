@@ -1,0 +1,13 @@
+{
+  "name": "sport-performance",
+  "version": "3.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node --check app/main.js && node --check app/domain.js && node --check app/extended-i18n.js && node --check scripts/build.mjs",
+    "test": "node --test tests/*.test.js"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

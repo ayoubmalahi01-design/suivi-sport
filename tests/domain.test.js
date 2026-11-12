@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {splitStudentNumbers,normalizeStudentNumber,nearestHigherScale,navetteMetrics,bmi,validateScaleRules,parseScalePaste,parseStudentPaste,repsPerMinute,repsPerSecond,averageRepSeconds,csvText} from '../app/domain.js';
+test('bulk number parser deduplicates, supports Arabic separators and Arabic/Persian digits',()=>assert.deepEqual(splitStudentNumbers('١٢، 13\n12;14 ۱۵'),['12','13','14','15']));
+test('student codes normalize Arabic/Persian numerals consistently',()=>assert.equal(normalizeStudentNumber(' ١٠١-۰۲ '),'101-02'));
+test('BARÈME rounds upward to next configured raw value and preserves decimals',()=>assert.deepEqual(nearestHigherScale(5.45,[{rawValue:5.5,score:10},{rawValue:6,score:12}]),{rawValue:5.5,score:10}));
+test('BARÈME does not invent a value when unmatched',()=>assert.equal(nearestHigherScale(9,[{rawValue:5,score:10}]),null));
+test('NAVETTE converts km/h to m/s and distance',()=>assert.deepEqual(navetteMetrics(12,60,10),{speed_kmh:12,speed_ms:3.333,shuttle_seconds:6,distance_m:200,duration_seconds:60,shuttles_completed:10}));
+test('NAVETTE rejects invalid speed and duration',()=>{assert.throws(()=>navetteMetrics(0));assert.throws(()=>navetteMetrics(10,-1));assert.throws(()=>navetteMetrics(10,0))});
+test('BMI uses meters and kilograms',()=>assert.equal(bmi(70,1.75),22.86));
+test('scale validation rejects duplicates and sorts ascending',()=>{assert.throws(()=>validateScaleRules([{rawValue:5,score:10},{rawValue:5,score:11}]));assert.deepEqual(validateScaleRules([{rawValue:6,score:12},{rawValue:5,score:10}]).map(x=>x.rawValue),[5,6])});
+test('scale bulk paste accepts tabs, decimal commas with semicolons, and decimals',()=>{assert.deepEqual(parseScalePaste('5.45\t10\n6,12'),[{rawValue:5.45,score:10},{rawValue:6,score:12}]);assert.deepEqual(parseScalePaste('rawValue;score\n5,45;10'),[{rawValue:5.45,score:10}]);assert.deepEqual(parseScalePaste('الأداء الخام;العلامة\n5.45;10'),[{rawValue:5.45,score:10}])});
+test('student bulk paste maps number/name/class',()=>assert.deepEqual(parseStudentPaste('101\tAli\t1A'),[{student_number:'101',full_name:'Ali',class_name:'1A'}]));
+test('repetition rates use configured duration only',()=>{assert.equal(repsPerMinute(30,60),30);assert.equal(repsPerSecond(30,60),0.5);assert.equal(averageRepSeconds(30,60),2);assert.equal(averageRepSeconds(0,60),null)});
+test('bulk student parser skips common header row',()=>{assert.deepEqual(parseStudentPaste('student_number\tfull_name\n101\tAli'),[{student_number:'101',full_name:'Ali',class_name:''}]);assert.deepEqual(parseStudentPaste('الرقم,الاسم الكامل\n101,علي'),[{student_number:'101',full_name:'علي',class_name:''}])});
+test('CSV quotes separators and embedded quotes',()=>assert.match(csvText([{name:'Ali; "A"'}]),/"Ali; ""A"""/));
+test('pasted CSV respects quoted commas and escaped quotes',()=>assert.deepEqual(parseStudentPaste('number,name\n101,\"Ali, ""The Coach""\"'),[{student_number:'101',full_name:'Ali, "The Coach"',class_name:''}]));

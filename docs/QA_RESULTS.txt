@@ -1,0 +1,21 @@
+Sport Performance 3.0 — QA verification
+Date: 2026-11-12
+
+LOCAL CHECKS — PASS
+- `npm run check`: JavaScript syntax checks passed for app/main.js, app/domain.js, app/extended-i18n.js, and scripts/build.mjs.
+- `npm test`: 42 tests passed, 0 failed. Tests cover student-number normalization, attendance number parsing, quoted CSV paste, BARÈME rules, NAVETTE conversions, BMI, repetition rates, and structural security/lifecycle checks in SQL migrations.
+- `npm run build`: Cloudflare Pages static upload bundle generated successfully.
+- Clean temporary extraction verification: `npm ci`, `npm run check`, all 42 tests, and `npm run build` passed again; generated upload assets matched the source build.
+- PWA manifest parses as valid JSON; the manifest, service worker, SVG icon, 192px/512px PNG icons, HTML entry point, CSS, and JavaScript modules are present in the upload bundle.
+- Build output mirrors the required static application assets; icon files required by the service-worker install cache are included.
+- No `service_role` credential is embedded in the application or package.
+- No Audit Log table, page, trigger, or RPC is included.
+- No fabricated students, results, or BARÈME values are seeded.
+
+NOT EXECUTED IN THIS BUILD ENVIRONMENT
+- PostgreSQL execution of all migrations against a live Supabase project. SQL checks here are structural assertions, not a substitute for running the migrations on PostgreSQL.
+- Live Auth/signup/email confirmation, two-institution RLS isolation, role approval, Storage uploads/downloads, and two-account coach-notebook privacy tests.
+- Live Cloudflare Pages deployment, custom domain, HTTPS, and redirect URL verification.
+- Physical-device acceptance on Android/iOS and multi-device sync using the user's actual Supabase project.
+
+These external checks require the user's Supabase and Cloudflare accounts and must be completed with `docs/PRODUCTION_CHECKLIST_AR.md` before real student data is entered. The package contains no production secrets and does not claim that those external services have already been connected or deployed.
